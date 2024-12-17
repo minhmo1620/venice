@@ -47,6 +47,7 @@ public enum AdminMessageType {
   REPLICATION_METADATA_SCHEMA_CREATION(20, false), CONFIGURE_ACTIVE_ACTIVE_REPLICATION_FOR_CLUSTER(21, true),
   /**
    * @deprecated We do not support incremental push policy anymore.
+   * Dummy comment to test commit
    */
   @Deprecated
   CONFIGURE_INCREMENTAL_PUSH_FOR_CLUSTER(22, true), META_SYSTEM_STORE_AUTO_CREATION_VALIDATION(23, false),
