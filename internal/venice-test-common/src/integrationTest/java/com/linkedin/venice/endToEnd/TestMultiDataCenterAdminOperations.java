@@ -208,6 +208,6 @@ public class TestMultiDataCenterAdminOperations {
     adminMessage.operationType = AdminMessageType.UPDATE_STORE.getValue();
     adminMessage.payloadUnion = updateStore;
     adminMessage.executionId = executionId;
-    return adminOperationSerializer.serialize(adminMessage);
+    return adminOperationSerializer.serialize(adminMessage, -1);
   }
 }

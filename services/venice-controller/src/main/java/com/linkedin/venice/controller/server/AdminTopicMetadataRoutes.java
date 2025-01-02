@@ -1,5 +1,6 @@
 package com.linkedin.venice.controller.server;
 
+import static com.linkedin.venice.controllerapi.ControllerApiConstants.ADMIN_OPERATION_PROTOCOL_VERSION;
 import static com.linkedin.venice.controllerapi.ControllerApiConstants.CLUSTER;
 import static com.linkedin.venice.controllerapi.ControllerApiConstants.EXECUTION_ID;
 import static com.linkedin.venice.controllerapi.ControllerApiConstants.NAME;
@@ -47,6 +48,8 @@ public class AdminTopicMetadataRoutes extends AbstractRoute {
         Map<String, Long> metadata = admin.getAdminTopicMetadata(clusterName, storeName);
 
         responseObject.setExecutionId(AdminTopicMetadataAccessor.getExecutionId(metadata));
+        responseObject
+            .setAdminOperationProtocolVersion(AdminTopicMetadataAccessor.getAdminOperationProtocolVersion(metadata));
         if (!storeName.isPresent()) {
           Pair<Long, Long> offsets = AdminTopicMetadataAccessor.getOffsets(metadata);
           responseObject.setOffset(offsets.getFirst());
@@ -81,6 +84,8 @@ public class AdminTopicMetadataRoutes extends AbstractRoute {
         Optional<String> storeName = Optional.ofNullable(request.queryParams(NAME));
         Optional<Long> offset = Optional.ofNullable(request.queryParams(OFFSET)).map(Long::parseLong);
         Optional<Long> upstreamOffset = Optional.ofNullable(request.queryParams(UPSTREAM_OFFSET)).map(Long::parseLong);
+        Optional<Long> adminOperationProtocolVersion =
+            Optional.ofNullable(request.queryParams(ADMIN_OPERATION_PROTOCOL_VERSION)).map(Long::parseLong);
 
         if (storeName.isPresent()) {
           if (offset.isPresent() || upstreamOffset.isPresent()) {
@@ -95,7 +100,13 @@ public class AdminTopicMetadataRoutes extends AbstractRoute {
         responseObject.setCluster(clusterName);
         storeName.ifPresent(responseObject::setName);
 
-        admin.updateAdminTopicMetadata(clusterName, executionId, storeName, offset, upstreamOffset);
+        admin.updateAdminTopicMetadata(
+            clusterName,
+            executionId,
+            storeName,
+            offset,
+            upstreamOffset,
+            adminOperationProtocolVersion);
       } catch (Throwable e) {
         responseObject.setError(e);
         AdminSparkServer.handleError(new VeniceException(e), request, response);

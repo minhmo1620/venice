@@ -7123,7 +7123,7 @@ public class VeniceHelixAdmin implements Admin, StoreCleaner {
       Long executionId = executionIdAccessor.getLastSucceededExecutionIdMap(clusterName).get(storeName.get());
       return executionId == null
           ? Collections.emptyMap()
-          : AdminTopicMetadataAccessor.generateMetadataMap(-1, -1, executionId);
+          : AdminTopicMetadataAccessor.generateMetadataMap(-1, -1, executionId, -1);
     }
     return adminConsumerServices.get(clusterName).getAdminTopicMetadata(clusterName);
   }
@@ -7137,7 +7137,8 @@ public class VeniceHelixAdmin implements Admin, StoreCleaner {
       long executionId,
       Optional<String> storeName,
       Optional<Long> offset,
-      Optional<Long> upstreamOffset) {
+      Optional<Long> upstreamOffset,
+      Optional<Long> adminOperationProtocolVersion) {
     if (storeName.isPresent()) {
       executionIdAccessor.updateLastSucceededExecutionIdMap(clusterName, storeName.get(), executionId);
     } else {
@@ -7145,7 +7146,12 @@ public class VeniceHelixAdmin implements Admin, StoreCleaner {
         throw new VeniceException("Offsets must be provided to update cluster-level admin topic metadata");
       }
       adminConsumerServices.get(clusterName)
-          .updateAdminTopicMetadata(clusterName, executionId, offset.get(), upstreamOffset.get());
+          .updateAdminTopicMetadata(
+              clusterName,
+              executionId,
+              offset.get(),
+              upstreamOffset.get(),
+              adminOperationProtocolVersion.get());
     }
   }
 

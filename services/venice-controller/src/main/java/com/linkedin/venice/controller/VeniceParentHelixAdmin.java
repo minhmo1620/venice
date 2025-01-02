@@ -625,10 +625,13 @@ public class VeniceParentHelixAdmin implements Admin {
             adminCommandExecutionTracker.createExecution(AdminMessageType.valueOf(message).name());
         message.executionId = execution.getExecutionId();
         VeniceWriter<byte[], byte[], byte[]> veniceWriter = veniceWriterMap.get(clusterName);
-        byte[] serializedValue = adminOperationSerializer.serialize(message);
+
+        Map<String, Long> metadata = adminTopicMetadataAccessor.getMetadata(clusterName);
+        int adminOperationProtocolVersion = (int) AdminTopicMetadataAccessor.getAdminOperationProtocolVersion(metadata);
+        byte[] serializedValue = adminOperationSerializer.serialize(message, adminOperationProtocolVersion);
         try {
-          Future<PubSubProduceResult> future = veniceWriter
-              .put(emptyKeyByteArr, serializedValue, AdminOperationSerializer.LATEST_SCHEMA_ID_FOR_ADMIN_OPERATION);
+          Future<PubSubProduceResult> future =
+              veniceWriter.put(emptyKeyByteArr, serializedValue, adminOperationProtocolVersion);
           PubSubProduceResult produceResult = future.get();
 
           LOGGER.info("Sent message: {} to kafka, offset: {}", message, produceResult.getOffset());
@@ -4258,7 +4261,8 @@ public class VeniceParentHelixAdmin implements Admin {
       long executionId,
       Optional<String> storeName,
       Optional<Long> offset,
-      Optional<Long> upstreamOffset) {
+      Optional<Long> upstreamOffset,
+      Optional<Long> adminOperationProtocolVersion) {
     throw new VeniceUnsupportedOperationException("updateAdminTopicMetadata");
   }
 
@@ -5349,8 +5353,12 @@ public class VeniceParentHelixAdmin implements Admin {
         throw new VeniceException("Failed to update store " + response.getError());
       }
 
-      response = destFabricChildControllerClient
-          .updateAdminTopicMetadata(storeExecutionId, Optional.of(storeName), Optional.empty(), Optional.empty());
+      response = destFabricChildControllerClient.updateAdminTopicMetadata(
+          storeExecutionId,
+          Optional.of(storeName),
+          Optional.empty(),
+          Optional.empty(),
+          Optional.empty());
       if (response.isError()) {
         throw new VeniceException("Failed to update store's execution id " + response.getError());
       }

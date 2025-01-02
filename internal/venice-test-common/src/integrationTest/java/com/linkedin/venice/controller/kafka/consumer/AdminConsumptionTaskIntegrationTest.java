@@ -224,7 +224,7 @@ public class AdminConsumptionTaskIntegrationTest {
     adminMessage.operationType = AdminMessageType.DISABLE_STORE_READ.getValue();
     adminMessage.payloadUnion = disableStoreRead;
     adminMessage.executionId = executionId;
-    return adminOperationSerializer.serialize(adminMessage);
+    return adminOperationSerializer.serialize(adminMessage, -1);
   }
 
   private byte[] getDisableWrite(String clusterName, String storeName, long executionId) {
@@ -235,7 +235,7 @@ public class AdminConsumptionTaskIntegrationTest {
     adminMessage.operationType = AdminMessageType.DISABLE_STORE_WRITE.getValue();
     adminMessage.payloadUnion = pauseStore;
     adminMessage.executionId = executionId;
-    return adminOperationSerializer.serialize(adminMessage);
+    return adminOperationSerializer.serialize(adminMessage, -1);
   }
 
   private byte[] getStoreCreationMessage(
@@ -259,7 +259,7 @@ public class AdminConsumptionTaskIntegrationTest {
     adminMessage.operationType = AdminMessageType.STORE_CREATION.getValue();
     adminMessage.payloadUnion = storeCreation;
     adminMessage.executionId = executionId;
-    return adminOperationSerializer.serialize(adminMessage);
+    return adminOperationSerializer.serialize(adminMessage, -1);
   }
 
   private byte[] getStoreDeletionMessage(String clusterName, String storeName, long executionId) {
@@ -272,6 +272,6 @@ public class AdminConsumptionTaskIntegrationTest {
     adminMessage.operationType = AdminMessageType.DELETE_STORE.getValue();
     adminMessage.payloadUnion = deleteStore;
     adminMessage.executionId = executionId;
-    return adminOperationSerializer.serialize(adminMessage);
+    return adminOperationSerializer.serialize(adminMessage, -1);
   }
 }

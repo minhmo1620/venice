@@ -15,16 +15,23 @@ public abstract class AdminTopicMetadataAccessor {
   private static final String UPSTREAM_OFFSET_KEY = "upstreamOffset";
   private static final String EXECUTION_ID_KEY = "executionId";
   private static final long UNDEFINED_VALUE = -1;
+  private static final String ADMIN_OPERATION_PROTOCOL_VERSION_KEY = "adminOperationProtocolVersion";
 
   /**
    * @return a map with {@linkplain AdminTopicMetadataAccessor#OFFSET_KEY}, {@linkplain AdminTopicMetadataAccessor#UPSTREAM_OFFSET_KEY},
-   *         {@linkplain AdminTopicMetadataAccessor#EXECUTION_ID_KEY} specified to input values.
+   *         {@linkplain AdminTopicMetadataAccessor#EXECUTION_ID_KEY}, {@linkplain AdminTopicMetadataAccessor#ADMIN_OPERATION_PROTOCOL_VERSION_KEY}
+   *         specified to input values.
    */
-  public static Map<String, Long> generateMetadataMap(long localOffset, long upstreamOffset, long executionId) {
+  public static Map<String, Long> generateMetadataMap(
+      long localOffset,
+      long upstreamOffset,
+      long executionId,
+      long adminOperationProtocolVersion) {
     Map<String, Long> metadata = new HashMap<>();
     metadata.put(OFFSET_KEY, localOffset);
     metadata.put(UPSTREAM_OFFSET_KEY, upstreamOffset);
     metadata.put(EXECUTION_ID_KEY, executionId);
+    metadata.put(ADMIN_OPERATION_PROTOCOL_VERSION_KEY, adminOperationProtocolVersion);
     return metadata;
   }
 
@@ -43,6 +50,10 @@ public abstract class AdminTopicMetadataAccessor {
    */
   public static long getExecutionId(Map<String, Long> metadata) {
     return metadata.getOrDefault(EXECUTION_ID_KEY, UNDEFINED_VALUE);
+  }
+
+  public static long getAdminOperationProtocolVersion(Map<String, Long> metadata) {
+    return metadata.getOrDefault(ADMIN_OPERATION_PROTOCOL_VERSION_KEY, UNDEFINED_VALUE);
   }
 
   /**

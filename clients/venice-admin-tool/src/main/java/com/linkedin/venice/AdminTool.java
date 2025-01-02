@@ -2819,7 +2819,8 @@ public class AdminTool {
                 response.getExecutionId(),
                 Optional.empty(),
                 Optional.of(response.getOffset()),
-                Optional.of(response.getUpstreamOffset())));
+                Optional.of(response.getUpstreamOffset()),
+                Optional.of(response.getAdminOperationProtocolVersion())));
       }
 
       latestStep = "step5: copying store metadata and starting data recovery for non-existent stores in dest fabric";

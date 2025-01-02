@@ -877,9 +877,9 @@ public class AdminConsumptionTask implements Runnable, Closeable {
     }
     Map<String, Long> metadata = remoteConsumptionEnabled
         ? AdminTopicMetadataAccessor
-            .generateMetadataMap(localOffsetCheckpointAtStartTime, lastOffset, lastDelegatedExecutionId)
+            .generateMetadataMap(localOffsetCheckpointAtStartTime, lastOffset, lastDelegatedExecutionId, -1)
         : AdminTopicMetadataAccessor
-            .generateMetadataMap(lastOffset, upstreamOffsetCheckpointAtStartTime, lastDelegatedExecutionId);
+            .generateMetadataMap(lastOffset, upstreamOffsetCheckpointAtStartTime, lastDelegatedExecutionId, -1);
     adminTopicMetadataAccessor.updateMetadata(clusterName, metadata);
     lastPersistedOffset = lastOffset;
     lastPersistedExecutionId = lastDelegatedExecutionId;

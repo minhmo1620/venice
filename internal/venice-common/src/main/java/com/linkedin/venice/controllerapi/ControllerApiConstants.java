@@ -83,6 +83,8 @@ public class ControllerApiConstants {
   public static final String PUSH_STRATEGY = "push_strategy";
 
   public static final String ACCESS_CONTROLLED = "access_controlled";
+
+  public static final String ADMIN_OPERATION_PROTOCOL_VERSION = "admin_operation_protocol_version";
   /**
    * @deprecated Use {@link #ENABLE_STORE_MIGRATION} instead. This constant is kept for backward compatibility
    * and will be removed in a future release.

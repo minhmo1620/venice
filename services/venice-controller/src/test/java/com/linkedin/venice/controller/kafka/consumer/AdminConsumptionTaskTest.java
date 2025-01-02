@@ -736,7 +736,7 @@ public class AdminConsumptionTaskTest {
         AdminOperationSerializer.LATEST_SCHEMA_ID_FOR_ADMIN_OPERATION);
     adminTopicMetadataAccessor.updateMetadata(
         clusterName,
-        AdminTopicMetadataAccessor.generateMetadataMap(metadataForStoreName0Future.get().getOffset(), -1, 1));
+        AdminTopicMetadataAccessor.generateMetadataMap(metadataForStoreName0Future.get().getOffset(), -1, 1, -1));
 
     // Write a message with a skipped execution id but a different producer metadata.
     veniceWriter.put(
@@ -822,7 +822,7 @@ public class AdminConsumptionTaskTest {
     // The store doesn't exist
     doReturn(false).when(admin).hasStore(clusterName, storeName1);
     doReturn(false).when(admin).hasStore(clusterName, storeName2);
-    Map<String, Long> newMetadata = AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1);
+    Map<String, Long> newMetadata = AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1);
     adminTopicMetadataAccessor.updateMetadata(clusterName, newMetadata);
 
     AdminConsumptionTask task = getAdminConsumptionTask(new RandomPollStrategy(), false);
@@ -974,7 +974,7 @@ public class AdminConsumptionTaskTest {
     adminMessage.operationType = AdminMessageType.UPDATE_STORE.getValue();
     adminMessage.payloadUnion = setStore;
     adminMessage.executionId = 2;
-    byte[] message = adminOperationSerializer.serialize(adminMessage);
+    byte[] message = adminOperationSerializer.serialize(adminMessage, -1);
 
     veniceWriter.put(emptyKeyBytes, message, AdminOperationSerializer.LATEST_SCHEMA_ID_FOR_ADMIN_OPERATION);
 
@@ -1111,7 +1111,7 @@ public class AdminConsumptionTaskTest {
         getKillOfflinePushJobMessage(clusterName, storeTopicName, 4L),
         AdminOperationSerializer.LATEST_SCHEMA_ID_FOR_ADMIN_OPERATION);
     long offset = future.get(TIMEOUT, TimeUnit.MILLISECONDS).getOffset();
-    Map<String, Long> newMetadata = AdminTopicMetadataAccessor.generateMetadataMap(offset, -1, 4L);
+    Map<String, Long> newMetadata = AdminTopicMetadataAccessor.generateMetadataMap(offset, -1, 4L, -1);
     adminTopicMetadataAccessor.updateMetadata(clusterName, newMetadata);
     executionIdAccessor.updateLastSucceededExecutionIdMap(clusterName, storeName, 4L);
     // Resubscribe to the admin topic and make sure it can still process new admin messages
@@ -1394,7 +1394,7 @@ public class AdminConsumptionTaskTest {
     adminMessage.operationType = AdminMessageType.DERIVED_SCHEMA_CREATION.getValue();
     adminMessage.payloadUnion = derivedSchemaCreation;
     adminMessage.executionId = 2;
-    byte[] message = adminOperationSerializer.serialize(adminMessage);
+    byte[] message = adminOperationSerializer.serialize(adminMessage, -1);
 
     veniceWriter.put(emptyKeyBytes, message, AdminOperationSerializer.LATEST_SCHEMA_ID_FOR_ADMIN_OPERATION);
 
@@ -1551,7 +1551,7 @@ public class AdminConsumptionTaskTest {
     adminMessage.operationType = AdminMessageType.STORE_CREATION.getValue();
     adminMessage.payloadUnion = storeCreation;
     adminMessage.executionId = executionId;
-    return adminOperationSerializer.serialize(adminMessage);
+    return adminOperationSerializer.serialize(adminMessage, -1);
   }
 
   private byte[] getKillOfflinePushJobMessage(String clusterName, String kafkaTopic, long executionId) {
@@ -1562,7 +1562,7 @@ public class AdminConsumptionTaskTest {
     adminMessage.operationType = AdminMessageType.KILL_OFFLINE_PUSH_JOB.getValue();
     adminMessage.payloadUnion = killJob;
     adminMessage.executionId = executionId;
-    return adminOperationSerializer.serialize(adminMessage);
+    return adminOperationSerializer.serialize(adminMessage, -1);
   }
 
   private byte[] getAddVersionMessage(
@@ -1609,7 +1609,7 @@ public class AdminConsumptionTaskTest {
     adminMessage.operationType = AdminMessageType.ADD_VERSION.getValue();
     adminMessage.payloadUnion = addVersion;
     adminMessage.executionId = executionId;
-    return adminOperationSerializer.serialize(adminMessage);
+    return adminOperationSerializer.serialize(adminMessage, -1);
   }
 
   @Test(expectedExceptions = VeniceException.class, expectedExceptionsMessageRegExp = "Admin topic remote consumption is enabled but no config found for the source Kafka bootstrap server url")

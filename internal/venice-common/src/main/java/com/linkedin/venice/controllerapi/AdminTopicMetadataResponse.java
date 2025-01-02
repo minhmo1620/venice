@@ -18,6 +18,11 @@ public class AdminTopicMetadataResponse extends ControllerResponse {
    */
   private long upstreamOffset = -1;
 
+  /**
+   * The latest admin operation protocol version
+   */
+  private long adminOperationProtocolVersion = -1;
+
   public long getExecutionId() {
     return executionId;
   }
@@ -40,5 +45,13 @@ public class AdminTopicMetadataResponse extends ControllerResponse {
 
   public void setUpstreamOffset(long upstreamOffset) {
     this.upstreamOffset = upstreamOffset;
+  }
+
+  public long getAdminOperationProtocolVersion() {
+    return adminOperationProtocolVersion;
+  }
+
+  public void setAdminOperationProtocolVersion(long adminOperationProtocolVersion) {
+    this.adminOperationProtocolVersion = adminOperationProtocolVersion;
   }
 }

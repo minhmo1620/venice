@@ -30,11 +30,13 @@ public class AdminOperationSerializer {
 
   private static final Map<Integer, Schema> PROTOCOL_MAP = initProtocolMap();
 
-  public byte[] serialize(AdminOperation object) {
+  public byte[] serialize(AdminOperation object, int schemaId) {
     try {
+      SpecificDatumWriter<AdminOperation> writer =
+          schemaId > 0 ? new SpecificDatumWriter<>(PROTOCOL_MAP.get(schemaId)) : SPECIFIC_DATUM_WRITER;
       ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
       Encoder encoder = AvroCompatibilityHelper.newBinaryEncoder(byteArrayOutputStream, true, null);
-      SPECIFIC_DATUM_WRITER.write(object, encoder);
+      writer.write(object, encoder);
       encoder.flush();
 
       return byteArrayOutputStream.toByteArray();
@@ -48,7 +50,7 @@ public class AdminOperationSerializer {
       throw new VeniceMessageException("Writer schema: " + writerSchemaId + " doesn't exist");
     }
     SpecificDatumReader<AdminOperation> reader =
-        new SpecificDatumReader<>(PROTOCOL_MAP.get(writerSchemaId), AdminOperation.getClassSchema());
+        new SpecificDatumReader<>(PROTOCOL_MAP.get(writerSchemaId), PROTOCOL_MAP.get(writerSchemaId));
     Decoder decoder = AvroCompatibilityHelper
         .newBinaryDecoder(byteBuffer.array(), byteBuffer.position(), byteBuffer.remaining(), null);
     try {
