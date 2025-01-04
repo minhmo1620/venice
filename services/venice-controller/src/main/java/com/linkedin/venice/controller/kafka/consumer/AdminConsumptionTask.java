@@ -875,11 +875,20 @@ public class AdminConsumptionTask implements Runnable, Closeable {
       // Skip since there are no new admin messages processed.
       return;
     }
+
+    Map<String, Long> metaData = adminTopicMetadataAccessor.getMetadata(clusterName);
+    Long currentAdminOperationProtocolVersion = AdminTopicMetadataAccessor.getAdminOperationProtocolVersion(metaData);
     Map<String, Long> metadata = remoteConsumptionEnabled
-        ? AdminTopicMetadataAccessor
-            .generateMetadataMap(localOffsetCheckpointAtStartTime, lastOffset, lastDelegatedExecutionId)
-        : AdminTopicMetadataAccessor
-            .generateMetadataMap(lastOffset, upstreamOffsetCheckpointAtStartTime, lastDelegatedExecutionId);
+        ? AdminTopicMetadataAccessor.generateMetadataMap(
+            localOffsetCheckpointAtStartTime,
+            lastOffset,
+            lastDelegatedExecutionId,
+            currentAdminOperationProtocolVersion)
+        : AdminTopicMetadataAccessor.generateMetadataMap(
+            lastOffset,
+            upstreamOffsetCheckpointAtStartTime,
+            lastDelegatedExecutionId,
+            currentAdminOperationProtocolVersion);
     adminTopicMetadataAccessor.updateMetadata(clusterName, metadata);
     lastPersistedOffset = lastOffset;
     lastPersistedExecutionId = lastDelegatedExecutionId;

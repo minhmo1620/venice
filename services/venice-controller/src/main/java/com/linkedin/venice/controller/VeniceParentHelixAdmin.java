@@ -4274,7 +4274,8 @@ public class VeniceParentHelixAdmin implements Admin {
       long executionId,
       Optional<String> storeName,
       Optional<Long> offset,
-      Optional<Long> upstreamOffset) {
+      Optional<Long> upstreamOffset,
+      Optional<Long> adminOperationProtocolVersion) {
     throw new VeniceUnsupportedOperationException("updateAdminTopicMetadata");
   }
 

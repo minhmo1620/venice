@@ -1,5 +1,6 @@
 package com.linkedin.venice.controller.server;
 
+import static com.linkedin.venice.controllerapi.ControllerApiConstants.ADMIN_OPERATION_PROTOCOL_VERSION;
 import static com.linkedin.venice.controllerapi.ControllerApiConstants.CLUSTER;
 import static com.linkedin.venice.controllerapi.ControllerApiConstants.EXECUTION_ID;
 import static com.linkedin.venice.controllerapi.ControllerApiConstants.NAME;
@@ -47,6 +48,8 @@ public class AdminTopicMetadataRoutes extends AbstractRoute {
         Map<String, Long> metadata = admin.getAdminTopicMetadata(clusterName, storeName);
 
         responseObject.setExecutionId(AdminTopicMetadataAccessor.getExecutionId(metadata));
+        responseObject
+            .setAdminOperationProtocolVersion(AdminTopicMetadataAccessor.getAdminOperationProtocolVersion(metadata));
         if (!storeName.isPresent()) {
           Pair<Long, Long> offsets = AdminTopicMetadataAccessor.getOffsets(metadata);
           responseObject.setOffset(offsets.getFirst());
@@ -61,7 +64,7 @@ public class AdminTopicMetadataRoutes extends AbstractRoute {
   }
 
   /**
-   * @see Admin#updateAdminTopicMetadata(String, long, Optional, Optional, Optional)
+   * @see Admin#updateAdminTopicMetadata(String, long, Optional, Optional, Optional, Optional)
    */
   public Route updateAdminTopicMetadata(Admin admin) {
     return (request, response) -> {
@@ -81,21 +84,30 @@ public class AdminTopicMetadataRoutes extends AbstractRoute {
         Optional<String> storeName = Optional.ofNullable(request.queryParams(NAME));
         Optional<Long> offset = Optional.ofNullable(request.queryParams(OFFSET)).map(Long::parseLong);
         Optional<Long> upstreamOffset = Optional.ofNullable(request.queryParams(UPSTREAM_OFFSET)).map(Long::parseLong);
+        Optional<Long> adminOperationProtocolVersion =
+            Optional.ofNullable(request.queryParams(ADMIN_OPERATION_PROTOCOL_VERSION)).map(Long::parseLong);
 
         if (storeName.isPresent()) {
           if (offset.isPresent() || upstreamOffset.isPresent()) {
             throw new VeniceException("There is no store-level offsets to be updated");
           }
         } else {
-          if (!offset.isPresent() || !upstreamOffset.isPresent()) {
-            throw new VeniceException("Offsets must be provided to update cluster-level admin topic metadata");
+          if (!adminOperationProtocolVersion.isPresent() && (!offset.isPresent() || !upstreamOffset.isPresent())) {
+            throw new VeniceException(
+                "Offsets must be provided to update cluster-level admin topic metadata if no store name and admin operation version provided.");
           }
         }
 
         responseObject.setCluster(clusterName);
         storeName.ifPresent(responseObject::setName);
 
-        admin.updateAdminTopicMetadata(clusterName, executionId, storeName, offset, upstreamOffset);
+        admin.updateAdminTopicMetadata(
+            clusterName,
+            executionId,
+            storeName,
+            offset,
+            upstreamOffset,
+            adminOperationProtocolVersion);
       } catch (Throwable e) {
         responseObject.setError(e);
         AdminSparkServer.handleError(new VeniceException(e), request, response);

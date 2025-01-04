@@ -264,7 +264,7 @@ public class TestVeniceParentHelixAdmin extends AbstractTestVeniceParentHelixAdm
         .when(veniceWriter)
         .put(any(), any(), anyInt());
     when(zkClient.readData(zkMetadataNodePath, null)).thenReturn(null)
-        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1));
+        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1));
 
     parentAdmin.initStorageCluster(clusterName);
 
@@ -344,7 +344,7 @@ public class TestVeniceParentHelixAdmin extends AbstractTestVeniceParentHelixAdm
       when(veniceWriter.put(any(), any(), anyInt())).then(invocation -> {
         // Once we send message to topic through venice writer, return offset 1
         when(zkClient.readData(metadataPath, null))
-            .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1));
+            .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1));
         CompletableFuture future = mock(CompletableFuture.class);
         doReturn(new SimplePubSubProduceResultImpl(adminTopic, partitionId, 1, -1)).when(future).get();
         return future;
@@ -456,7 +456,7 @@ public class TestVeniceParentHelixAdmin extends AbstractTestVeniceParentHelixAdm
         .put(any(), any(), anyInt());
 
     when(zkClient.readData(zkMetadataNodePath, null)).thenReturn(null)
-        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1));
+        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1));
 
     parentAdmin.initStorageCluster(clusterName);
     parentAdmin.addValueSchema(clusterName, storeName, valueSchemaStr, DirectionalSchemaCompatibilityType.FULL);
@@ -508,7 +508,7 @@ public class TestVeniceParentHelixAdmin extends AbstractTestVeniceParentHelixAdm
         .put(any(), any(), anyInt());
 
     when(zkClient.readData(zkMetadataNodePath, null)).thenReturn(null)
-        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1));
+        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1));
 
     parentAdmin.initStorageCluster(clusterName);
     parentAdmin.addDerivedSchema(clusterName, storeName, valueSchemaId, derivedSchemaStr);
@@ -535,7 +535,7 @@ public class TestVeniceParentHelixAdmin extends AbstractTestVeniceParentHelixAdm
         .put(any(), any(), anyInt());
 
     when(zkClient.readData(zkMetadataNodePath, null)).thenReturn(null)
-        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1));
+        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1));
 
     String storeName = "test-store";
     parentAdmin.initStorageCluster(clusterName);
@@ -571,7 +571,7 @@ public class TestVeniceParentHelixAdmin extends AbstractTestVeniceParentHelixAdm
         .put(any(), any(), anyInt());
 
     when(zkClient.readData(zkMetadataNodePath, null)).thenReturn(null)
-        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1));
+        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1));
 
     String storeName = "test-store";
     parentAdmin.initStorageCluster(clusterName);
@@ -612,7 +612,7 @@ public class TestVeniceParentHelixAdmin extends AbstractTestVeniceParentHelixAdm
 
     when(zkClient.readData(zkMetadataNodePath, null))
         .thenReturn(new OffsetRecord(AvroProtocolDefinition.PARTITION_STATE.getSerializer()))
-        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1));
+        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1));
 
     parentAdmin.initStorageCluster(clusterName);
     assertThrows(VeniceNoStoreException.class, () -> parentAdmin.setStoreWriteability(clusterName, storeName, false));
@@ -625,7 +625,7 @@ public class TestVeniceParentHelixAdmin extends AbstractTestVeniceParentHelixAdm
         .put(any(), any(), anyInt());
 
     when(zkClient.readData(zkMetadataNodePath, null)).thenReturn(null)
-        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1));
+        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1));
 
     String storeName = "test-store";
     parentAdmin.initStorageCluster(clusterName);
@@ -661,7 +661,7 @@ public class TestVeniceParentHelixAdmin extends AbstractTestVeniceParentHelixAdm
         .put(any(), any(), anyInt());
 
     when(zkClient.readData(zkMetadataNodePath, null)).thenReturn(null)
-        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1));
+        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1));
 
     String storeName = "test-store";
     parentAdmin.initStorageCluster(clusterName);
@@ -700,7 +700,7 @@ public class TestVeniceParentHelixAdmin extends AbstractTestVeniceParentHelixAdm
         .put(any(), any(), anyInt());
 
     when(zkClient.readData(zkMetadataNodePath, null)).thenReturn(null)
-        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1));
+        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1));
     Store store = mock(Store.class);
     doReturn(store).when(internalAdmin).getStore(clusterName, pubSubTopic.getStoreName());
 
@@ -763,7 +763,7 @@ public class TestVeniceParentHelixAdmin extends AbstractTestVeniceParentHelixAdm
           .when(veniceWriter)
           .put(any(), any(), anyInt());
       when(zkClient.readData(zkMetadataNodePath, null)).thenReturn(null)
-          .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1));
+          .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1));
       partialMockParentAdmin.incrementVersionIdempotent(clusterName, storeName, pushJobId, 1, 1);
       verify(internalAdmin).addVersionAndTopicOnly(
           clusterName,
@@ -894,7 +894,7 @@ public class TestVeniceParentHelixAdmin extends AbstractTestVeniceParentHelixAdm
           .when(veniceWriter)
           .put(any(), any(), anyInt());
       when(zkClient.readData(zkMetadataNodePath, null)).thenReturn(null)
-          .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1));
+          .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1));
       Version newVersion = partialMockParentAdmin.incrementVersionIdempotent(
           clusterName,
           storeName,
@@ -984,7 +984,7 @@ public class TestVeniceParentHelixAdmin extends AbstractTestVeniceParentHelixAdm
           .when(veniceWriter)
           .put(any(), any(), anyInt());
       when(zkClient.readData(zkMetadataNodePath, null)).thenReturn(null)
-          .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1));
+          .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1));
       partialMockParentAdmin.incrementVersionIdempotent(
           clusterName,
           storeName,
@@ -1748,7 +1748,7 @@ public class TestVeniceParentHelixAdmin extends AbstractTestVeniceParentHelixAdm
         .put(any(), any(), anyInt());
 
     when(zkClient.readData(zkMetadataNodePath, null)).thenReturn(null)
-        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1));
+        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1));
 
     UpdateStoreQueryParams storeQueryParams1 = new UpdateStoreQueryParams().setBlobTransferEnabled(true);
     parentAdmin.initStorageCluster(clusterName);
@@ -1878,7 +1878,7 @@ public class TestVeniceParentHelixAdmin extends AbstractTestVeniceParentHelixAdm
         .put(any(), any(), anyInt());
 
     when(zkClient.readData(zkMetadataNodePath, null)).thenReturn(null)
-        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1));
+        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1));
 
     parentAdmin.initStorageCluster(clusterName);
     parentAdmin
@@ -1903,7 +1903,7 @@ public class TestVeniceParentHelixAdmin extends AbstractTestVeniceParentHelixAdm
         .put(any(), any(), anyInt());
 
     when(zkClient.readData(zkMetadataNodePath, null)).thenReturn(null)
-        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1));
+        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1));
 
     UpdateStoreQueryParams updateStoreQueryParams = new UpdateStoreQueryParams().setTargetRegionSwap("prod")
         .setTargetRegionSwapWaitTime(100)
@@ -1941,7 +1941,7 @@ public class TestVeniceParentHelixAdmin extends AbstractTestVeniceParentHelixAdm
         .put(any(), any(), anyInt());
 
     when(zkClient.readData(zkMetadataNodePath, null)).thenReturn(null)
-        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1));
+        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1));
 
     parentAdmin.initStorageCluster(clusterName);
     // When user disable hybrid but also try to manually turn on A/A or Incremental Push, update operation should fail
@@ -2110,7 +2110,7 @@ public class TestVeniceParentHelixAdmin extends AbstractTestVeniceParentHelixAdm
         .put(any(), any(), anyInt());
 
     when(zkClient.readData(zkMetadataNodePath, null)).thenReturn(null)
-        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1));
+        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1));
 
     parentAdmin.initStorageCluster(clusterName);
     parentAdmin.updateStore(
@@ -2141,7 +2141,7 @@ public class TestVeniceParentHelixAdmin extends AbstractTestVeniceParentHelixAdm
         .put(any(), any(), anyInt());
 
     when(zkClient.readData(zkMetadataNodePath, null)).thenReturn(null)
-        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1));
+        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1));
     parentAdmin.initStorageCluster(clusterName);
 
     assertThrows(
@@ -2175,7 +2175,7 @@ public class TestVeniceParentHelixAdmin extends AbstractTestVeniceParentHelixAdm
         .put(any(), any(), anyInt());
 
     when(zkClient.readData(zkMetadataNodePath, null)).thenReturn(null)
-        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1));
+        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1));
 
     parentAdmin.initStorageCluster(clusterName);
     parentAdmin.deleteStore(clusterName, storeName, 0, true);
@@ -2514,7 +2514,7 @@ public class TestVeniceParentHelixAdmin extends AbstractTestVeniceParentHelixAdm
           .put(any(), any(), anyInt());
       mockControllerClients(storeName);
       when(zkClient.readData(zkMetadataNodePath, null)).thenReturn(null)
-          .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1));
+          .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1));
 
       if (isIncrementalPush) {
         /**
@@ -2672,7 +2672,7 @@ public class TestVeniceParentHelixAdmin extends AbstractTestVeniceParentHelixAdm
         .put(any(), any(), anyInt());
 
     when(zkClient.readData(zkMetadataNodePath, null)).thenReturn(null)
-        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1));
+        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1));
 
     parentAdmin.initStorageCluster(clusterName);
     parentAdmin.updateStore(
@@ -2737,7 +2737,7 @@ public class TestVeniceParentHelixAdmin extends AbstractTestVeniceParentHelixAdm
         .when(veniceWriter)
         .put(any(), any(), anyInt());
     when(zkClient.readData(zkMetadataNodePath, null)).thenReturn(null)
-        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1));
+        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1));
     parentAdmin.initStorageCluster(clusterName);
     String storeName = "test-store";
     String owner = "test-owner";
@@ -2912,7 +2912,7 @@ public class TestVeniceParentHelixAdmin extends AbstractTestVeniceParentHelixAdm
         .put(any(), any(), anyInt());
 
     when(zkClient.readData(zkMetadataNodePath, null)).thenReturn(null)
-        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1));
+        .thenReturn(AdminTopicMetadataAccessor.generateMetadataMap(1, -1, 1, -1));
 
     parentAdmin.initStorageCluster(clusterName);
     return store;

@@ -186,9 +186,15 @@ public class AdminConsumerService extends AbstractVeniceService {
   /**
    * Update cluster-level execution id, offset, and upstream offset in a child colo.
    */
-  public void updateAdminTopicMetadata(String clusterName, long executionId, long offset, long upstreamOffset) {
+  public void updateAdminTopicMetadata(
+      String clusterName,
+      long executionId,
+      long offset,
+      long upstreamOffset,
+      long adminOperationProtocolVersion) {
     if (clusterName.equals(config.getClusterName())) {
-      Map<String, Long> metadata = AdminTopicMetadataAccessor.generateMetadataMap(offset, upstreamOffset, executionId);
+      Map<String, Long> metadata = AdminTopicMetadataAccessor
+          .generateMetadataMap(offset, upstreamOffset, executionId, adminOperationProtocolVersion);
       adminTopicMetadataAccessor.updateMetadata(clusterName, metadata);
     } else {
       throw new VeniceException(

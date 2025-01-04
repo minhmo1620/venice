@@ -7119,13 +7119,15 @@ public class VeniceHelixAdmin implements Admin, StoreCleaner {
    * @return cluster-level execution id, offset and upstream offset. If store name is specified, it returns store-level execution id.
    */
   public Map<String, Long> getAdminTopicMetadata(String clusterName, Optional<String> storeName) {
+    Map<String, Long> metadata = adminConsumerServices.get(clusterName).getAdminTopicMetadata(clusterName);
     if (storeName.isPresent()) {
       Long executionId = executionIdAccessor.getLastSucceededExecutionIdMap(clusterName).get(storeName.get());
+      Long adminOperationProtocolVersion = AdminTopicMetadataAccessor.getAdminOperationProtocolVersion(metadata);
       return executionId == null
           ? Collections.emptyMap()
-          : AdminTopicMetadataAccessor.generateMetadataMap(-1, -1, executionId);
+          : AdminTopicMetadataAccessor.generateMetadataMap(-1, -1, executionId, adminOperationProtocolVersion);
     }
-    return adminConsumerServices.get(clusterName).getAdminTopicMetadata(clusterName);
+    return metadata;
   }
 
   /**
@@ -7137,7 +7139,8 @@ public class VeniceHelixAdmin implements Admin, StoreCleaner {
       long executionId,
       Optional<String> storeName,
       Optional<Long> offset,
-      Optional<Long> upstreamOffset) {
+      Optional<Long> upstreamOffset,
+      Optional<Long> adminOperationProtocolVersion) {
     if (storeName.isPresent()) {
       executionIdAccessor.updateLastSucceededExecutionIdMap(clusterName, storeName.get(), executionId);
     } else {
@@ -7145,7 +7148,12 @@ public class VeniceHelixAdmin implements Admin, StoreCleaner {
         throw new VeniceException("Offsets must be provided to update cluster-level admin topic metadata");
       }
       adminConsumerServices.get(clusterName)
-          .updateAdminTopicMetadata(clusterName, executionId, offset.get(), upstreamOffset.get());
+          .updateAdminTopicMetadata(
+              clusterName,
+              executionId,
+              offset.get(),
+              upstreamOffset.get(),
+              adminOperationProtocolVersion.get());
     }
   }
 
