@@ -5366,8 +5366,12 @@ public class VeniceParentHelixAdmin implements Admin {
         throw new VeniceException("Failed to update store " + response.getError());
       }
 
-      response = destFabricChildControllerClient
-          .updateAdminTopicMetadata(storeExecutionId, Optional.of(storeName), Optional.empty(), Optional.empty());
+      response = destFabricChildControllerClient.updateAdminTopicMetadata(
+          storeExecutionId,
+          Optional.of(storeName),
+          Optional.empty(),
+          Optional.empty(),
+          Optional.empty());
       if (response.isError()) {
         throw new VeniceException("Failed to update store's execution id " + response.getError());
       }

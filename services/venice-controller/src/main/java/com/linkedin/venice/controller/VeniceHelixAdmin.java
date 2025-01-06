@@ -7133,6 +7133,7 @@ public class VeniceHelixAdmin implements Admin, StoreCleaner {
   /**
    * Update cluster-level execution id, offset and upstream offset.
    * If store name is specified, it updates the store-level execution id.
+   * If adminOperationProtocolVersion is specified, it updates the version of admin operation, else, keep the same version
    */
   public void updateAdminTopicMetadata(
       String clusterName,
@@ -7141,19 +7142,31 @@ public class VeniceHelixAdmin implements Admin, StoreCleaner {
       Optional<Long> offset,
       Optional<Long> upstreamOffset,
       Optional<Long> adminOperationProtocolVersion) {
+    Map<String, Long> metadata = adminConsumerServices.get(clusterName).getAdminTopicMetadata(clusterName);
     if (storeName.isPresent()) {
       executionIdAccessor.updateLastSucceededExecutionIdMap(clusterName, storeName.get(), executionId);
+    } else if (adminOperationProtocolVersion.isPresent()) {
+      Pair<Long, Long> currentOffsets = AdminTopicMetadataAccessor.getOffsets(metadata);
+      adminConsumerServices.get(clusterName)
+          .updateAdminTopicMetadata(
+              clusterName,
+              executionId,
+              currentOffsets.getFirst(),
+              currentOffsets.getSecond(),
+              adminOperationProtocolVersion.get());
     } else {
       if (!offset.isPresent() || !upstreamOffset.isPresent()) {
         throw new VeniceException("Offsets must be provided to update cluster-level admin topic metadata");
       }
+
+      long currentAdminOperationProtocolVersion = AdminTopicMetadataAccessor.getAdminOperationProtocolVersion(metadata);
       adminConsumerServices.get(clusterName)
           .updateAdminTopicMetadata(
               clusterName,
               executionId,
               offset.get(),
               upstreamOffset.get(),
-              adminOperationProtocolVersion.get());
+              currentAdminOperationProtocolVersion);
     }
   }
 
