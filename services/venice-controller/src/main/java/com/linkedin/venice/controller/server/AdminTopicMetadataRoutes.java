@@ -84,15 +84,13 @@ public class AdminTopicMetadataRoutes extends AbstractRoute {
         Optional<String> storeName = Optional.ofNullable(request.queryParams(NAME));
         Optional<Long> offset = Optional.ofNullable(request.queryParams(OFFSET)).map(Long::parseLong);
         Optional<Long> upstreamOffset = Optional.ofNullable(request.queryParams(UPSTREAM_OFFSET)).map(Long::parseLong);
-        Optional<Long> adminOperationProtocolVersion =
-            Optional.ofNullable(request.queryParams(ADMIN_OPERATION_PROTOCOL_VERSION)).map(Long::parseLong);
 
         if (storeName.isPresent()) {
           if (offset.isPresent() || upstreamOffset.isPresent()) {
             throw new VeniceException("There is no store-level offsets to be updated");
           }
         } else {
-          if (!adminOperationProtocolVersion.isPresent() && (!offset.isPresent() || !upstreamOffset.isPresent())) {
+          if (!offset.isPresent() || !upstreamOffset.isPresent()) {
             throw new VeniceException(
                 "Offsets must be provided to update cluster-level admin topic metadata if no store name and admin operation version provided.");
           }
@@ -101,13 +99,35 @@ public class AdminTopicMetadataRoutes extends AbstractRoute {
         responseObject.setCluster(clusterName);
         storeName.ifPresent(responseObject::setName);
 
-        admin.updateAdminTopicMetadata(
-            clusterName,
-            executionId,
-            storeName,
-            offset,
-            upstreamOffset,
-            adminOperationProtocolVersion);
+        admin.updateAdminTopicMetadata(clusterName, executionId, storeName, offset, upstreamOffset);
+      } catch (Throwable e) {
+        responseObject.setError(e);
+        AdminSparkServer.handleError(new VeniceException(e), request, response);
+      }
+      return AdminSparkServer.OBJECT_MAPPER.writeValueAsString(responseObject);
+    };
+  }
+
+  public Route updateAdminOperationProtocolVersion(Admin admin) {
+    return (request, response) -> {
+      ControllerResponse responseObject = new ControllerResponse();
+      response.type(HttpConstants.JSON);
+      try {
+        if (!isAllowListUser(request)) {
+          response.status(HttpStatus.SC_FORBIDDEN);
+          responseObject.setError("Only admin users are allowed to run " + request.url());
+          responseObject.setErrorType(ErrorType.BAD_REQUEST);
+          return AdminSparkServer.OBJECT_MAPPER.writeValueAsString(responseObject);
+        }
+
+        AdminSparkServer.validateParams(request, UPDATE_ADMIN_TOPIC_METADATA.getParams(), admin);
+        String clusterName = request.queryParams(CLUSTER);
+        Long adminOperationProtocolVersion = Long.parseLong(request.queryParams(ADMIN_OPERATION_PROTOCOL_VERSION));
+
+        responseObject.setCluster(clusterName);
+
+        admin.updateAdminOperationProtocolVersion(clusterName, adminOperationProtocolVersion);
+
       } catch (Throwable e) {
         responseObject.setError(e);
         AdminSparkServer.handleError(new VeniceException(e), request, response);

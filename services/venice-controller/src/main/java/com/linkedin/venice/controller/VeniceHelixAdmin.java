@@ -7133,27 +7133,16 @@ public class VeniceHelixAdmin implements Admin, StoreCleaner {
   /**
    * Update cluster-level execution id, offset and upstream offset.
    * If store name is specified, it updates the store-level execution id.
-   * If adminOperationProtocolVersion is specified, it updates the version of admin operation, else, keep the same version
    */
   public void updateAdminTopicMetadata(
       String clusterName,
       long executionId,
       Optional<String> storeName,
       Optional<Long> offset,
-      Optional<Long> upstreamOffset,
-      Optional<Long> adminOperationProtocolVersion) {
+      Optional<Long> upstreamOffset) {
     Map<String, Long> metadata = adminConsumerServices.get(clusterName).getAdminTopicMetadata(clusterName);
     if (storeName.isPresent()) {
       executionIdAccessor.updateLastSucceededExecutionIdMap(clusterName, storeName.get(), executionId);
-    } else if (adminOperationProtocolVersion.isPresent()) {
-      Pair<Long, Long> currentOffsets = AdminTopicMetadataAccessor.getOffsets(metadata);
-      adminConsumerServices.get(clusterName)
-          .updateAdminTopicMetadata(
-              clusterName,
-              executionId,
-              currentOffsets.getFirst(),
-              currentOffsets.getSecond(),
-              adminOperationProtocolVersion.get());
     } else {
       if (!offset.isPresent() || !upstreamOffset.isPresent()) {
         throw new VeniceException("Offsets must be provided to update cluster-level admin topic metadata");
@@ -7168,6 +7157,24 @@ public class VeniceHelixAdmin implements Admin, StoreCleaner {
               upstreamOffset.get(),
               currentAdminOperationProtocolVersion);
     }
+  }
+
+  /**
+   * Update the version of admin operation protocol in admin topic metadata
+   */
+  public void updateAdminOperationProtocolVersion(String clusterName, Long adminOperationProtocolVersion) {
+    Map<String, Long> metadata = adminConsumerServices.get(clusterName).getAdminTopicMetadata(clusterName);
+
+    Pair<Long, Long> currentOffsets = AdminTopicMetadataAccessor.getOffsets(metadata);
+    Long executionId = AdminTopicMetadataAccessor.getExecutionId(metadata);
+
+    adminConsumerServices.get(clusterName)
+        .updateAdminTopicMetadata(
+            clusterName,
+            executionId,
+            currentOffsets.getFirst(),
+            currentOffsets.getSecond(),
+            adminOperationProtocolVersion);
   }
 
   /**

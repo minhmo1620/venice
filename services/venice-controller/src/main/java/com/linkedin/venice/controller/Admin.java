@@ -964,8 +964,9 @@ public interface Admin extends AutoCloseable, Closeable {
       long executionId,
       Optional<String> storeName,
       Optional<Long> offset,
-      Optional<Long> upstreamOffset,
-      Optional<Long> adminOperationProtocolVersion);
+      Optional<Long> upstreamOffset);
+
+  void updateAdminOperationProtocolVersion(String clusterName, Long adminOperationProtocolVersion);
 
   void createStoragePersona(
       String clusterName,

@@ -284,7 +284,11 @@ public enum ControllerRoute {
   ), GET_ADMIN_TOPIC_METADATA("/get_admin_topic_metadata", HttpMethod.GET, Collections.singletonList(CLUSTER), NAME),
   UPDATE_ADMIN_TOPIC_METADATA(
       "/update_admin_topic_metadata", HttpMethod.POST, Arrays.asList(CLUSTER, EXECUTION_ID), NAME, OFFSET,
-      UPSTREAM_OFFSET, ADMIN_OPERATION_PROTOCOL_VERSION
+      UPSTREAM_OFFSET
+  ),
+  UPDATE_ADMIN_OPERATION_PROTOCOL_VERSION(
+      "/update_admin_operation_protocol_version", HttpMethod.POST, Collections.singletonList(CLUSTER),
+      ADMIN_OPERATION_PROTOCOL_VERSION
   ), DELETE_KAFKA_TOPIC("/delete_kafka_topic", HttpMethod.POST, Arrays.asList(CLUSTER, TOPIC)),
 
   CREATE_STORAGE_PERSONA(
