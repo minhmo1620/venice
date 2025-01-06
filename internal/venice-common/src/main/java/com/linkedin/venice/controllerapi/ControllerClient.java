@@ -1349,13 +1349,11 @@ public class ControllerClient implements Closeable {
       long executionId,
       Optional<String> storeName,
       Optional<Long> offset,
-      Optional<Long> upstreamOffset,
-      Optional<Long> adminOperationProtocolVersion) {
+      Optional<Long> upstreamOffset) {
     QueryParams params = newParams().add(EXECUTION_ID, executionId)
         .add(NAME, storeName)
         .add(OFFSET, offset)
-        .add(UPSTREAM_OFFSET, upstreamOffset)
-        .add(ADMIN_OPERATION_PROTOCOL_VERSION, adminOperationProtocolVersion);
+        .add(UPSTREAM_OFFSET, upstreamOffset);
     return request(ControllerRoute.UPDATE_ADMIN_TOPIC_METADATA, params, ControllerResponse.class);
   }
 

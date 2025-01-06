@@ -109,14 +109,7 @@ public class TestFabricBuildout {
       checkStoreConfig(dc0Client, storeName);
       // Mimic source fabric store-level execution id
       Assert.assertFalse(
-          dc0Client
-              .updateAdminTopicMetadata(
-                  2L,
-                  Optional.of(storeName),
-                  Optional.empty(),
-                  Optional.empty(),
-                  Optional.empty())
-              .isError());
+          dc0Client.updateAdminTopicMetadata(2L, Optional.of(storeName), Optional.empty(), Optional.empty()).isError());
 
       // Call metadata copy over to copy dc0's store configs to dc1
       parentControllerClient.copyOverStoreMetadata(dcNames[0], dcNames[1], storeName);

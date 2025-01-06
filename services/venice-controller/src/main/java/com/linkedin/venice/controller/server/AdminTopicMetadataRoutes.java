@@ -64,7 +64,7 @@ public class AdminTopicMetadataRoutes extends AbstractRoute {
   }
 
   /**
-   * @see Admin#updateAdminTopicMetadata(String, long, Optional, Optional, Optional, Optional)
+   * @see Admin#updateAdminTopicMetadata(String, long, Optional, Optional, Optional)
    */
   public Route updateAdminTopicMetadata(Admin admin) {
     return (request, response) -> {
@@ -91,8 +91,7 @@ public class AdminTopicMetadataRoutes extends AbstractRoute {
           }
         } else {
           if (!offset.isPresent() || !upstreamOffset.isPresent()) {
-            throw new VeniceException(
-                "Offsets must be provided to update cluster-level admin topic metadata if no store name and admin operation version provided.");
+            throw new VeniceException("Offsets must be provided to update cluster-level admin topic metadata");
           }
         }
 
