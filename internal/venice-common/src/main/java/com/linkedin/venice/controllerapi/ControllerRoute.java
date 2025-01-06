@@ -287,8 +287,8 @@ public enum ControllerRoute {
       UPSTREAM_OFFSET
   ),
   UPDATE_ADMIN_OPERATION_PROTOCOL_VERSION(
-      "/update_admin_operation_protocol_version", HttpMethod.POST, Collections.singletonList(CLUSTER),
-      ADMIN_OPERATION_PROTOCOL_VERSION
+      "/update_admin_operation_protocol_version", HttpMethod.POST,
+      Arrays.asList(CLUSTER, ADMIN_OPERATION_PROTOCOL_VERSION)
   ), DELETE_KAFKA_TOPIC("/delete_kafka_topic", HttpMethod.POST, Arrays.asList(CLUSTER, TOPIC)),
 
   CREATE_STORAGE_PERSONA(

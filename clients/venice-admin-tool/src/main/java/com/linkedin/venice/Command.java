@@ -566,7 +566,7 @@ public enum Command {
   ),
   UPDATE_ADMIN_OPERATION_PROTOCOL_VERSION(
       "update-admin-operation-protocol-version", "Update the admin operation protocol version",
-      new Arg[] { CLUSTER, ADMIN_OPERATION_PROTOCOL_VERSION }
+      new Arg[] { URL, CLUSTER, ADMIN_OPERATION_PROTOCOL_VERSION }
   );
 
   private final String commandName;
