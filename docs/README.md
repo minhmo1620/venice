@@ -21,6 +21,7 @@
 </html>
 
 Venice is a derived data storage platform, providing the following characteristics:
+<Testing>
 
 1. High throughput asynchronous ingestion from batch and streaming sources (e.g. [Hadoop](https://github.com/apache/hadoop) and [Samza](https://github.com/apache/samza)).
 2. Low latency online reads via remote queries or in-process caching.
