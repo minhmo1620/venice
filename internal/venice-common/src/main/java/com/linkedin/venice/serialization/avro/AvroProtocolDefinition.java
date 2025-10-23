@@ -2,6 +2,7 @@ package com.linkedin.venice.serialization.avro;
 
 import com.linkedin.venice.admin.protocol.response.AdminResponseRecord;
 import com.linkedin.venice.client.change.capture.protocol.RecordChangeEvent;
+import com.linkedin.venice.controller.kafka.protocol.admin.AdminOperation;
 import com.linkedin.venice.exceptions.VeniceException;
 import com.linkedin.venice.exceptions.VeniceMessageException;
 import com.linkedin.venice.ingestion.protocol.IngestionMetricsReport;
@@ -75,9 +76,8 @@ public enum AvroProtocolDefinition {
    * {@link Put} of a {@link KafkaMessageEnvelope}, and thus leverages the envelope
    * for versioning.
    *
-   * TODO: Move AdminOperation to venice-common module so that we can properly reference it here.
    */
-  ADMIN_OPERATION(91, SpecificData.get().getSchema(ByteBuffer.class), "AdminOperation"),
+  ADMIN_OPERATION(91, AdminOperation.class),
 
   /**
    * Single chunk of a large multi-chunk value. Just a bunch of bytes.
