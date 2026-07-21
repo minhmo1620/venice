@@ -7,6 +7,7 @@ import com.linkedin.venice.controllerapi.SchemaResponse;
 import com.linkedin.venice.controllerapi.UpdateStoreQueryParams;
 import com.linkedin.venice.exceptions.VeniceException;
 import com.linkedin.venice.meta.StoreInfo;
+import com.linkedin.venice.pubsub.api.PubSubTopic;
 import com.linkedin.venice.schema.SchemaEntry;
 import java.util.HashSet;
 import java.util.List;
@@ -23,6 +24,30 @@ final class StoreMigrationHelper {
   private StoreMigrationHelper() {
   }
 
+  static void validateEncryptionClusterMigration(
+      StoreInfo srcStore,
+      boolean srcEncryptionCluster,
+      boolean destEncryptionCluster,
+      Set<PubSubTopic> sourceTopics,
+      String srcClusterName,
+      String destClusterName,
+      String storeName) {
+    if (srcEncryptionCluster) {
+      throw new VeniceException(
+          "Cannot migrate store " + storeName + " out of encryption cluster " + srcClusterName + ".");
+    }
+    if (!destEncryptionCluster) {
+      return;
+    }
+
+    boolean hasStoreTopic = sourceTopics.stream().anyMatch(topic -> storeName.equals(topic.getStoreName()));
+    if (!srcStore.getVersions().isEmpty() || hasStoreTopic) {
+      throw new VeniceException(
+          "Cannot migrate non-empty store " + storeName + " into encryption cluster " + destClusterName
+              + ". The store must have no versions or topics.");
+    }
+  }
+
   static void cloneDestinationStoreAndSyncConfigs(
       ControllerClient destControllerClient,
       StoreInfo srcStore,
@@ -32,6 +57,7 @@ final class StoreMigrationHelper {
       String destClusterName,
       String storeName,
       String localRegion,
+      boolean destEncryptionCluster,
       Logger logger) {
     NewStoreResponse newStoreResponse = destControllerClient
         .createNewStore(storeName, srcStore.getOwner(), keySchema, valueSchemaEntries.get(0).getSchema().toString());
@@ -52,10 +78,16 @@ final class StoreMigrationHelper {
     }
 
     UpdateStoreQueryParams params = new UpdateStoreQueryParams(srcStore, true);
+    if (destEncryptionCluster) {
+      params.setEncryptionEnabled(true);
+    }
     Set<String> remainingRegions = new HashSet<>();
     remainingRegions.add(localRegion);
     for (Map.Entry<String, StoreInfo> entry: srcStoresInChildColos.get(storeName).entrySet()) {
       UpdateStoreQueryParams paramsInChildColo = new UpdateStoreQueryParams(entry.getValue(), true);
+      if (destEncryptionCluster) {
+        paramsInChildColo.setEncryptionEnabled(true);
+      }
       if (params.isDifferent(paramsInChildColo)) {
         paramsInChildColo.setRegionsFilter(entry.getKey());
         logger.info("Sending update-store request {} to store {} in {}", paramsInChildColo, storeName, entry.getKey());

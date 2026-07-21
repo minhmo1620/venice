@@ -4407,23 +4407,52 @@ public class VeniceParentHelixAdmin implements Admin {
       throw new VeniceException("Source cluster and destination cluster cannot be the same!");
     }
 
-    MigrateStore migrateStore = (MigrateStore) AdminMessageType.MIGRATE_STORE.getNewInstance();
-    migrateStore.srcClusterName = srcClusterName;
-    migrateStore.destClusterName = destClusterName;
-    migrateStore.storeName = storeName;
+    acquireAdminMessageLock(srcClusterName, storeName);
+    try {
+      Store srcStore = getVeniceHelixAdmin().getStore(srcClusterName, storeName);
+      if (srcStore != null) {
+        boolean destEncryptionCluster = getControllerConfig(destClusterName).isEncryptionCluster();
+        StoreMigrationHelper.validateEncryptionClusterMigration(
+            StoreInfo.fromStore(srcStore),
+            getControllerConfig(srcClusterName).isEncryptionCluster(),
+            destEncryptionCluster,
+            destEncryptionCluster ? getSourceChildTopics(srcClusterName) : Collections.emptySet(),
+            srcClusterName,
+            destClusterName,
+            storeName);
+      }
 
-    // Set src store migration flag
-    UpdateStoreQueryParams params = new UpdateStoreQueryParams().setStoreMigration(true);
-    this.updateStore(srcClusterName, storeName, params);
+      MigrateStore migrateStore = (MigrateStore) AdminMessageType.MIGRATE_STORE.getNewInstance();
+      migrateStore.srcClusterName = srcClusterName;
+      migrateStore.destClusterName = destClusterName;
+      migrateStore.storeName = storeName;
 
-    // Update migration src and dest cluster in storeConfig
-    getVeniceHelixAdmin().setStoreConfigForMigration(storeName, srcClusterName, destClusterName);
+      StoreConfigUpdater
+          .applyOnParent(this, srcClusterName, storeName, new UpdateStoreQueryParams().setStoreMigration(true));
 
-    // Trigger store migration operation
-    AdminOperation message = new AdminOperation();
-    message.operationType = AdminMessageType.MIGRATE_STORE.getValue();
-    message.payloadUnion = migrateStore;
-    sendAdminMessageAndWaitForConsumed(srcClusterName, storeName, message);
+      getVeniceHelixAdmin().setStoreConfigForMigration(storeName, srcClusterName, destClusterName);
+
+      AdminOperation message = new AdminOperation();
+      message.operationType = AdminMessageType.MIGRATE_STORE.getValue();
+      message.payloadUnion = migrateStore;
+      sendAdminMessageAndWaitForConsumed(srcClusterName, storeName, message);
+    } finally {
+      releaseAdminMessageLock(srcClusterName, storeName);
+    }
+  }
+
+  private Set<PubSubTopic> getSourceChildTopics(String srcClusterName) {
+    Set<String> sourceKafkaUrls =
+        new HashSet<>(getControllerConfig(srcClusterName).getChildDataCenterKafkaUrlMap().values());
+    if (sourceKafkaUrls.isEmpty()) {
+      return getTopicManager().listTopics();
+    }
+
+    Set<PubSubTopic> sourceTopics = new HashSet<>();
+    for (String sourceKafkaUrl: sourceKafkaUrls) {
+      sourceTopics.addAll(getVeniceHelixAdmin().getTopicManager(sourceKafkaUrl).listTopics());
+    }
+    return sourceTopics;
   }
 
   /**

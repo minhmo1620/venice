@@ -1818,6 +1818,16 @@ public class VeniceHelixAdmin implements Admin, StoreCleaner {
       }
     }
 
+    boolean destEncryptionCluster = getControllerConfig(destClusterName).isEncryptionCluster();
+    StoreMigrationHelper.validateEncryptionClusterMigration(
+        srcStore,
+        getControllerConfig(srcClusterName).isEncryptionCluster(),
+        destEncryptionCluster,
+        destEncryptionCluster ? getTopicManager().listTopics() : Collections.emptySet(),
+        srcClusterName,
+        destClusterName,
+        storeName);
+
     if (!isParent()) {
       // Update store and storeConfig to support single datacenter store migration
       this.updateStore(srcClusterName, storeName, new UpdateStoreQueryParams().setStoreMigration(true));
@@ -1859,6 +1869,7 @@ public class VeniceHelixAdmin implements Admin, StoreCleaner {
         destClusterName,
         storeName,
         multiClusterConfigs.getRegionName(),
+        destEncryptionCluster,
         LOGGER);
 
     Consumer<String> versionMigrationConsumer = migratingStoreName -> {
