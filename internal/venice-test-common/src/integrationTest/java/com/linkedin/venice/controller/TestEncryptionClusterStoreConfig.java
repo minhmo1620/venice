@@ -23,7 +23,7 @@ import org.testng.annotations.Test;
 /**
  * Verifies encryption-cluster ({@code cluster.encryption.enabled=true}) store behavior: a newly
  * created store defaults to {@code encryptionEnabled=true} (via {@code configureNewStore}), and
- * update-store preserves the encryption metadata.
+ * update-store accepts and preserves its KMS-defined PubSub encryption key URN.
  */
 public class TestEncryptionClusterStoreConfig {
   private static final int TEST_TIMEOUT = 30 * Time.MS_PER_SECOND;
@@ -69,6 +69,21 @@ public class TestEncryptionClusterStoreConfig {
       Assert.assertTrue(
           storeResponse.getStore().isEncryptionEnabled(),
           "A newly created store in an encryption cluster must default to encryptionEnabled=true");
+      Assert.assertEquals(storeResponse.getStore().getPubSubEncryptionKeyUrn(), "");
+
+      String pubSubEncryptionKeyUrn = "urn:li:kmsKeyLineage:encryption-cluster-test";
+      ControllerResponse keyUpdate = controllerClient
+          .updateStore(storeName, new UpdateStoreQueryParams().setPubSubEncryptionKeyUrn(pubSubEncryptionKeyUrn));
+      Assert.assertFalse(
+          keyUpdate.isError(),
+          "Setting a KMS PubSub encryption key URN must succeed: " + keyUpdate.getError());
+      Assert.assertEquals(
+          controllerClient.getStore(storeName).getStore().getPubSubEncryptionKeyUrn(),
+          pubSubEncryptionKeyUrn);
+
+      ControllerResponse blankKeyUpdate =
+          controllerClient.updateStore(storeName, new UpdateStoreQueryParams().setPubSubEncryptionKeyUrn("  "));
+      Assert.assertTrue(blankKeyUpdate.isError(), "Blank PubSub encryption key URNs must be rejected");
 
       ControllerResponse omittedUpdate =
           controllerClient.updateStore(storeName, new UpdateStoreQueryParams().setOwner("new-owner"));
@@ -79,6 +94,10 @@ public class TestEncryptionClusterStoreConfig {
       Assert.assertTrue(
           storeAfterUpdate.getStore().isEncryptionEnabled(),
           "Omitting encryptionEnabled must not make metadata inconsistent with cluster policy");
+      Assert.assertEquals(
+          storeAfterUpdate.getStore().getPubSubEncryptionKeyUrn(),
+          pubSubEncryptionKeyUrn,
+          "Omitting pubSubEncryptionKeyUrn must preserve the existing KMS value");
 
       ControllerResponse replicateAllUpdate = controllerClient.updateStore(
           storeName,
@@ -87,6 +106,9 @@ public class TestEncryptionClusterStoreConfig {
       Assert.assertTrue(
           controllerClient.getStore(storeName).getStore().isEncryptionEnabled(),
           "Replicate-all updates must preserve encryption metadata");
+      Assert.assertEquals(
+          controllerClient.getStore(storeName).getStore().getPubSubEncryptionKeyUrn(),
+          pubSubEncryptionKeyUrn);
 
       venice.getLeaderVeniceController()
           .getVeniceHelixAdmin()
@@ -98,13 +120,21 @@ public class TestEncryptionClusterStoreConfig {
           controllerClient.getStore(storeName).getStore().isEncryptionEnabled(),
           "The test setup must simulate an existing store with stale metadata");
 
+      ControllerResponse unencryptedKeyUpdate = controllerClient
+          .updateStore(storeName, new UpdateStoreQueryParams().setPubSubEncryptionKeyUrn(pubSubEncryptionKeyUrn));
+      Assert.assertTrue(
+          unencryptedKeyUpdate.isError(),
+          "PubSub encryption key URNs must be rejected when store metadata has encryption disabled");
+
       ControllerResponse staleMetadataUpdate =
           controllerClient.updateStore(storeName, new UpdateStoreQueryParams().setOwner("reconciled-owner"));
       Assert.assertFalse(staleMetadataUpdate.isError(), "Updates that omit encryptionEnabled must skip validation");
       Assert.assertFalse(
           controllerClient.getStore(storeName).getStore().isEncryptionEnabled(),
           "An omitted encryption value must leave existing metadata unchanged");
-
+      Assert.assertEquals(
+          controllerClient.getStore(storeName).getStore().getPubSubEncryptionKeyUrn(),
+          pubSubEncryptionKeyUrn);
     }
   }
 }
